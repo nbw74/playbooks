@@ -1,0 +1,9 @@
+---
+- name: "MY ENVIRONMENT"
+  hosts: all
+  become: no
+
+  roles:
+    - { role: myenv }
+...
+# vim:ft=ansible:

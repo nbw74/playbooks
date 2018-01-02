@@ -1,0 +1,9 @@
+---
+- name: "MEMCACHED"
+  hosts: all
+  become: yes
+
+  roles:
+    - { role: memcached }
+...
+# vim:ft=ansible:

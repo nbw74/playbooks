@@ -1,0 +1,10 @@
+---
+- name: "NginX web-server"
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  roles:
+    - { role: nginx }
+...
+# vim:ft=ansible:

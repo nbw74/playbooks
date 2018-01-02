@@ -1,0 +1,20 @@
+---
+#####
+# BEFORE INSTALL
+#
+# CentOS 6: remove interface declaration from
+# /etc/udev/rules.d/70-persistent-net.rules and
+# remove HWADDR from /etc/sysconfig/network-scripts/ifcfg-eth0
+#
+# CentOS 7: set hostname in localhost.localdomain
+#
+
+- name: "New installation of CentOS host"
+  hosts: all
+  vars:
+    ansible_user: root
+
+  roles:
+    - { role: common }
+...
+# vim:ft=ansible:
