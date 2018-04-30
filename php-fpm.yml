@@ -2,7 +2,6 @@
 - name: "NginX + PHP-FPM web-server"
   hosts: all
   become: yes
-  become_method: sudo
 
   roles:
     - { role: php-fpm }

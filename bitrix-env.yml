@@ -2,7 +2,6 @@
 - name: "Bitrix CMS"
   hosts: all
   become: yes
-  become_method: sudo
 
   roles:
     - { role: bitrix-env }

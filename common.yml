@@ -11,8 +11,7 @@
 
 - name: "New installation of CentOS host"
   hosts: all
-  vars:
-    ansible_user: root
+  become: yes
 
   roles:
     - { role: common }
