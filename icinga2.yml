@@ -1,0 +1,9 @@
+---
+- name: "ICINGA2 HELPER ROLE"
+  hosts: all
+  become: yes
+
+  roles:
+    - { role: icinga2 }
+...
+# vim:ft=ansible:
