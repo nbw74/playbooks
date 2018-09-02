@@ -1,0 +1,9 @@
+---
+- name: "Linux bridge configuration"
+  hosts: all
+  become: yes
+
+  roles:
+    - bridge
+...
+# vim:ft=ansible:
