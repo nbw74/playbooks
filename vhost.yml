@@ -1,5 +1,5 @@
 ---
-- name: "NginX web-server virtual hosts configuration"
+- name: "NGINX VIRTUAL HOSTS"
   hosts: all
   become: yes
 

@@ -1,5 +1,5 @@
 ---
-- name: "Linux bridge configuration"
+- name: "LINUX BRIDGE"
   hosts: all
   become: yes
 

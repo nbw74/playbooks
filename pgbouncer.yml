@@ -1,5 +1,5 @@
 ---
-- name: "PgBouncer"
+- name: "PGBOUNCER"
   hosts: all
   become: yes
 
