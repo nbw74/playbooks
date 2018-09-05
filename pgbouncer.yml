@@ -1,0 +1,9 @@
+---
+- name: "PgBouncer"
+  hosts: all
+  become: yes
+
+  roles:
+    - { role: pgbouncer }
+...
+# vim:ft=ansible:
