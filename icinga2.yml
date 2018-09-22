@@ -1,5 +1,5 @@
 ---
-- name: "ICINGA2 HELPER ROLE"
+- name: "ICINGA2 HELPER"
   hosts: all
   become: yes
 

@@ -1,5 +1,5 @@
 ---
-- name: "Linux bridge configuration"
+- name: "QEMU-KVM HYPERVISOR"
   hosts: all
   become: yes
 

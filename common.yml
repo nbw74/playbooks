@@ -9,7 +9,7 @@
 # CentOS 7: set hostname in localhost.localdomain
 #
 
-- name: "New installation of CentOS host"
+- name: "CENTOS COMMON"
   hosts: all
   become: yes
 

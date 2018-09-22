@@ -1,5 +1,5 @@
 ---
-- name: "NginX + PHP-FPM web-server"
+- name: "PHP-FPM"
   hosts: all
   become: yes
 

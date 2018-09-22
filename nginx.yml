@@ -1,5 +1,5 @@
 ---
-- name: "NginX web-server"
+- name: "NGINX"
   hosts: all
   become: yes
 
