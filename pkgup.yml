@@ -1,4 +1,5 @@
 ---
+# vim: set ft=yaml.ansible:
 - name: Update selected packages
   hosts: all
 
@@ -16,4 +17,3 @@
         - wget
         - openssh-server
 ...
-# vim:ft=ansible:

@@ -1,0 +1,69 @@
+---
+- name: "{{ domain.1.name }}: get domain xml on src"
+  virt:
+    name: "{{ domain.1.name }}"
+    command: get_xml
+  register: reg_src_xml
+  delegate_to: "{{ domain.0.src }}"
+
+- name: "{{ domain.1.name }}: remove 'address' tags"
+  xml:
+    xmlstring: "{{ reg_src_xml.get_xml }}"
+    xpath: "/*/*/*/address"
+    state: absent
+  register: reg_dest_xml
+  delegate_to: "{{ domain.0.dest }}"
+
+- name: "{{ domain.1.name }}: virt define"
+  virt:
+    name: "{{ domain.1.name }}"
+    command: define
+    xml: "{{ reg_dest_xml.xmlstring }}"
+  delegate_to: "{{ domain.0.dest }}"
+
+- name: "{{ domain.1.name }}: virt-xml cpu"
+  command: >
+    virt-xml {{ domain.1.name }} -q --edit --cpu host-model,clearxml=yes
+  delegate_to: "{{ domain.0.dest }}"
+
+- name: "{{ domain.1.name }}: virt-xml disk path (plain)"
+  command: >
+    virt-xml {{ domain.1.name }} -q --edit --disk path=/dev/{{ domain.0.vg }}/{{ lvol_dev|basename }}
+  delegate_to: "{{ domain.0.dest }}"
+  when: domain.1.lv is not defined
+
+- name: Block for dest with trim support
+  block:
+    - name: "{{ domain.1.name }}: virt-xml scsi-virtio"
+      command: >
+        virt-xml {{ domain.1.name }} -q --add-device --controller type=scsi,model=virtio-scsi
+      delegate_to: "{{ domain.0.dest }}"
+      register: reg_vx_scsi
+      failed_when:
+        - reg_vx_scsi.failed
+        - reg_vx_scsi.stderr.find('controllers with index') == -1
+
+    - name: "{{ domain.1.name }}: virt-xml disk bus"
+      command: >
+        virt-xml {{ domain.1.name }} -q --edit --disk target=sda,bus=scsi,cache=none,discard=unmap,address.type=drive,address.bus=0,address.unit=0
+      delegate_to: "{{ domain.0.dest }}"
+  when: trim_dest
+
+- name: Block for dest without trim support
+  block:
+    - name: "{{ domain.1.name }}: virt-xml scsi-virtio"
+      command: >
+        virt-xml {{ domain.1.name }} -q --remove-device --controller type=scsi,model=virtio-scsi
+      delegate_to: "{{ domain.0.dest }}"
+      register: reg_vx_scsi
+      failed_when: 
+        - reg_vx_scsi.failed
+        - reg_vx_scsi.stderr.find('No matching objects found for') == -1
+
+    - name: "{{ domain.1.name }}: virt-xml disk bus"
+      command: >
+        virt-xml {{ domain.1.name }} -q --edit --disk target=vda,bus=virtio,cache=none,discard=,address.type=pci,address.bus=0x00,address.unit=
+      delegate_to: "{{ domain.0.dest }}"
+  when: not trim_dest
+
+...

@@ -1,0 +1,35 @@
+---
+- name: Block for migrated domain startup
+  block:
+    - name: "{{ domain.1.name }}: domain running"
+      virt:
+        name: "{{ domain.1.name }}"
+        state: running
+      delegate_to: "{{ domain.0.dest }}"
+
+    - name: "{{ domain.1.name }}: ping health check ipv4"
+      command: >
+        ping -i0.2 -W1 -c5 {{ health_ipaddr|ipv4('address')|quote }}
+      changed_when: false
+      register: reg_ping
+      until: not reg_ping.failed
+      retries: 40
+      delay: 5
+
+    - name: "{{ domain.1.name }}: undefine domain on src"
+      virt:
+        name: "{{ domain.1.name }}"
+        command: undefine
+      delegate_to: "{{ domain.0.src }}"
+
+    - name: "{{ domain.1.name }}: delete lv on src"
+      lvol:
+        lv: "{{ lvol_dev|basename }}"
+        vg: "{{ lvol_dev|dirname|basename }}"
+        state: absent
+        force: true
+      delegate_to: "{{ domain.0.src }}"
+      become: true
+
+  when: domain.1.lv is not defined
+...

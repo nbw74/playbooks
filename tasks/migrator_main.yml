@@ -1,0 +1,42 @@
+---
+- name: "{{ domain.1.name }}: get domains list from src"
+  virt:
+    command: list_vms
+  register: reg_domains_list_src
+  delegate_to: "{{ domain.0.src }}"
+
+- name: "{{ domain.1.name }}: set domain presence on src"
+  set_fact:
+    domain_present_on_src: "{{ domain.1.name in reg_domains_list_src.list_vms }}"
+
+- name: "{{ domain.1.name }}: get domains list from dest"
+  virt:
+    command: list_vms
+  register: reg_domains_list_dest
+  delegate_to: "{{ domain.0.dest }}"
+
+- name: "{{ domain.1.name }}: set domain presence on dest"
+  set_fact:
+    domain_present_on_dest: "{{ domain.1.name in reg_domains_list_dest.list_vms }}"
+
+- name: Common block
+  block:
+    - name: "{{ domain.1.name }}: include init tasks"
+      include_tasks: migrator_init.yml
+
+    - name: "{{ domain.1.name }}: include close tasks"
+      include_tasks: migrator_close.yml
+
+    - name: "{{ domain.1.name }}: include dump tasks"
+      include_tasks: migrator_dump.yml
+
+    - name: "{{ domain.1.name }}: include xml tasks"
+      include_tasks: migrator_xml.yml
+
+    - name: "{{ domain.1.name }}: include startup tasks"
+      include_tasks: migrator_start.yml
+
+  when:
+    - domain_present_on_src
+    - not domain_present_on_dest
+...

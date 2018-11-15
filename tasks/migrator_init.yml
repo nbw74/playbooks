@@ -1,0 +1,116 @@
+---
+- name: "{{ domain.1.name }}: check disks count"
+  shell: >
+    virsh -q domblklist {{ domain.1.name|quote }} | grep -c '[sv]d[a-z]'
+  register: reg_blk_count
+  delegate_to: "{{ domain.0.src }}"
+  changed_when: false
+
+- name: "{{ domain.1.name }}: fail if bad disks count"
+  fail:
+    msg: "DOMAIN {{ domain.1.name|quote }} DISKS COUNT ({{ reg_blk_count.stdout }}) IS NOT EQUAL 1"
+  when: reg_blk_count.stdout|int != 1
+
+- name: "{{ domain.1.name }}: get block device"
+  shell: >
+    virsh -q domblklist {{ domain.1.name|quote }} | awk '$1 ~ "[sv]d[a-z]" { print $2; exit }'
+  register: reg_blklist
+  delegate_to: "{{ domain.0.src }}"
+  changed_when: false
+
+- name: "{{ domain.1.name }}: fail if unable get block device"
+  fail:
+    msg: "UNABLE GET BLOCK DEVICE PATH FOR DOMAIN '{{ domain.1.name }}'"
+  when: reg_blklist.stdout|d('') == ""
+
+- name: "{{ domain.1.name }}: set fact (boot_dev)"
+  set_fact:
+    boot_dev: "{{ reg_blklist.stdout }}"
+
+- name: "{{ domain.1.name }}: set fact (lv_dev)"
+  set_fact:
+    lvol_dev: "{{ (domain.1.lv is defined)|ternary(domain.1.lv|d(''),boot_dev) }}"
+
+- name: "{{ domain.1.name }}: get trim support on dest"
+  shell: >
+    lsblk -do NAME,DISC-GRAN
+    | awk '/sd[a-z]|nvme/ { if($2 != "0B") flag=1 } END { if(flag) print "True"; else print "False" }'
+  register: reg_trim_dest
+  delegate_to: "{{ domain.0.dest }}"
+  become: yes
+  changed_when: false
+
+- name: "{{ domain.1.name }}: set fact (trim_dest)"
+  set_fact:
+    trim_dest: "{{ reg_trim_dest.stdout|bool }}"
+
+- debug:
+    msg:
+      - "trim_dest: {{ trim_dest }}"
+
+- name: Block for plain VM
+  block:
+    - name: "{{ domain.1.name }}: domain running"
+      virt:
+        name: "{{ domain.1.name }}"
+        state: running
+      register: reg_dom_run
+      delegate_to: "{{ domain.0.src }}"
+
+    - name: "{{ domain.1.name }}: waiting for qemu-agent become reachable"
+      shell: >
+        virsh -q qemu-agent-command {{ domain.1.name|quote }} --timeout 2 '{ "execute": "guest-sync", "arguments": { "id": 123456 } }'
+      register: reg_ga_sync
+      until: reg_ga_sync.stdout.find('123456') != -1
+      retries: 20
+      delay: 5
+      delegate_to: "{{ domain.0.src }}"
+      changed_when: false
+
+    - name: "{{ domain.1.name }}: set health check ipv4 if defined in config"
+      set_fact:
+        health_ipaddr: "{{ domain.1.ip|ipv4('address')|d('noaddress') }}"
+      when: domain.ip is defined
+
+    - name: "{{ domain.1.name }}: get ip addresses"
+      shell: >
+        virsh -q domifaddr {{ domain.1.name|quote }} --source agent | awk '$3 == "ipv4" { print $4 }'
+      register: reg_ifaddr
+      when: domain.ip is not defined
+      delegate_to: "{{ domain.0.src }}"
+      until: reg_ifaddr.stdout_lines|length > 1
+      retries: 10
+      delay: 5
+      changed_when: false
+
+    - debug:
+        msg:
+          - "reg_ifaddr.stdout_lines: {{ reg_ifaddr.stdout_lines }}"
+
+    - name: "{{ domain.1.name }}: set health check ipv4 (if private)"
+      set_fact:
+        health_ipaddr: "{{ reg_ifaddr.stdout_lines | ipv4('private') | first | d('noaddress') }}"
+      when:
+        - domain.1.ip is not defined
+        - reg_ifaddr.stdout_lines|length > 0
+
+    - name: "{{ domain.1.name }}: set health check ipv4 (if public only)"
+      set_fact:
+        health_ipaddr: "{{ reg_ifaddr.stdout_lines | ipv4('public') | first | d('noaddress') }}"
+      when:
+        - health_ipaddr|d('noaddress') == 'noaddress'
+        - domain.1.ip is not defined
+        - reg_ifaddr.stdout_lines|length > 0
+
+    - name: "{{ domain.1.name }}: fail if health check ipv4 still not defined"
+      fail:
+        msg: "CANNOT GET IPv4 FOR HEALTH CHECK, PLEASE DEFINE IT MANUALLY"
+      when: health_ipaddr|d('noaddress') == 'noaddress'
+
+    - name: "{{ domain.1.name }}: ping health check ipv4"
+      command: >
+        ping -i0.2 -W1 -c3 {{ health_ipaddr|ipv4('address')|quote }}
+      changed_when: false
+
+  when: domain.1.lv is not defined
+...

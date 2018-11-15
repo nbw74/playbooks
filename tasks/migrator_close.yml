@@ -1,0 +1,50 @@
+---
+- name: "{{ domain.1.name }}: domain shutdown"
+  virt:
+    name: "{{ domain.1.name }}"
+    state: shutdown
+  delegate_to: "{{ domain.0.src }}"
+
+- name: "{{ domain.1.name }}: waiting for shutdown"
+  virt:
+    name: "{{ domain.1.name }}"
+    command: status
+  register: reg_virt_status
+  until: reg_virt_status.status == 'shutdown'
+  retries: 20
+  delay: 5
+  delegate_to: "{{ domain.0.src }}"
+
+- name: Block for encrypted domain
+  block:
+    - name: "{{ domain.1.name }}: get cryptsetup status"
+      command: >
+        cryptsetup status {{ boot_dev|basename|quote }}
+      register: reg_luks_status
+      delegate_to: "{{ domain.0.src }}"
+      become: true
+      failed_when:
+        - reg_luks_status.failed
+        - reg_luks_status.stdout.find('is inactive') == -1
+      changed_when: false
+
+    - name: "{{ domain.1.name }}: luksClose"
+      command: >
+        cryptsetup luksClose {{ boot_dev|basename|quote }}
+      when: reg_luks_status.stdout.find('is active') != -1
+      delegate_to: "{{ domain.0.src }}"
+      become: true
+
+  when: domain.1.lv is defined
+
+- name: "{{ domain.1.name }}: waiting for lv closing"
+  command: >
+    lvs --noheadings --quiet -o lv_device_open {{ lvol_dev|quote }}
+  register: reg_lv_open
+  until: reg_lv_open.stdout.find('open') == -1
+  retries: 10
+  delay: 5
+  delegate_to: "{{ domain.0.src }}"
+  become: true
+  changed_when: false
+...

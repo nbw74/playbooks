@@ -1,0 +1,41 @@
+---
+# vim: set ft=yaml.ansible:
+#
+# Playbook for VM migration
+# Data structure:
+#
+# migrate_domains:
+#   - name: VM name (domain) as visible by 'virsh list'
+#     src: source_hostname
+#     dest: destination_hostname
+#     vg: volume_group_on_dest
+#     ip: health_check_ipv4 (only if cannot get from VM)
+#     lv: source_logical_volume (only if LUKS used)
+
+- name: MIGRATE VIRTUAL MACHINES
+  hosts: localhost
+  gather_facts: false
+
+  environment:
+    LANG: C
+    LC_ALL: C
+    LIBVIRT_DEFAULT_URI: qemu:///system
+
+  vars_files:
+    - "conf/migrate_domains.yml"
+
+  vars:
+    migrate_nc_port: "20666"
+
+  tasks:
+
+    - name: Main loop
+      include_tasks: tasks/migrator_main.yml
+      when: not domain.1.skip|d()
+      with_subelements:
+        - "{{ migrate_domains }}"
+        - domains
+      loop_control:
+        loop_var: domain
+        label: "{{ domain.1.name }}"
+...
