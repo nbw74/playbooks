@@ -32,6 +32,15 @@
   delegate_to: "{{ domain.0.dest }}"
   when: domain.1.lv is not defined
 
+- name: "{{ domain.1.name }}: virt-xml remove cdrom"
+  command: >
+    virt-xml {{ domain.1.name }} -q --remove-device --disk device=cdrom
+  delegate_to: "{{ domain.0.dest }}"
+  register: reg_vx_cdrom
+  failed_when:
+    - reg_vx_cdrom.failed
+    - reg_vx_cdrom.stderr.find('No matching objects found for') == -1
+
 - name: Block for dest with trim support
   block:
     - name: "{{ domain.1.name }}: virt-xml scsi-virtio"
