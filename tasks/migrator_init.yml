@@ -22,9 +22,15 @@
     - boot_dev|length > 1
     - domain.1.lv is defined
 
-- name: "{{ domain.1.name }}: set fact (lvol_dev list)"
+- name: "{{ domain.1.name }}: set fact (lvol_dev list I)"
   set_fact:
-    lvol_dev: "{{ (domain.1.lv is defined)|ternary(domain.1.lv|d(''),boot_dev) }}"
+    lvol_dev: "{{ boot_dev }}"
+  when: domain.1.lv is not defined
+
+- name: "{{ domain.1.name }}: set fact (lvol_dev list II)"
+  set_fact:
+    lvol_dev: "[ '{{ domain.1.lv }}' ]"
+  when: domain.1.lv is defined
 
 - name: "{{ domain.1.name }}: get trim support on dest"
   shell: >
