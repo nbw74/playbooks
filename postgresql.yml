@@ -6,4 +6,3 @@
   roles:
     - { role: postgresql }
 ...
-# vim:ft=ansible:

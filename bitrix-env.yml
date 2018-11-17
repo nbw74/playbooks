@@ -6,4 +6,3 @@
   roles:
     - { role: bitrix-env }
 ...
-# vim:ft=ansible:

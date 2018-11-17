@@ -1,5 +1,4 @@
 ---
-# vim: set ft=yaml.ansible:
 - name: Update selected packages
   hosts: all
 

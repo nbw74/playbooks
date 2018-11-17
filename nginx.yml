@@ -6,4 +6,3 @@
   roles:
     - { role: nginx }
 ...
-# vim:ft=ansible:

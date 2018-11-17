@@ -6,4 +6,3 @@
   roles:
     - selinux-for-web
 ...
-# vim:ft=ansible:

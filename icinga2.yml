@@ -6,4 +6,3 @@
   roles:
     - { role: icinga2 }
 ...
-# vim:ft=ansible:

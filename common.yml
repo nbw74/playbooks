@@ -16,4 +16,3 @@
   roles:
     - { role: common }
 ...
-# vim:ft=ansible:

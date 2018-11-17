@@ -6,4 +6,3 @@
   roles:
     - vhost
 ...
-# vim:ft=ansible:
