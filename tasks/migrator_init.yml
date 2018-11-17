@@ -1,19 +1,7 @@
 ---
-- name: "{{ domain.1.name }}: check disks count"
+- name: "{{ domain.1.name }}: get block devices"
   shell: >
-    virsh -q domblklist {{ domain.1.name|quote }} | grep -c '[sv]d[a-z]'
-  register: reg_blk_count
-  delegate_to: "{{ domain.0.src }}"
-  changed_when: false
-
-- name: "{{ domain.1.name }}: fail if bad disks count"
-  fail:
-    msg: "DOMAIN {{ domain.1.name|quote }} DISKS COUNT ({{ reg_blk_count.stdout }}) IS NOT EQUAL 1"
-  when: reg_blk_count.stdout|int != 1
-
-- name: "{{ domain.1.name }}: get block device"
-  shell: >
-    virsh -q domblklist {{ domain.1.name|quote }} | awk '$1 ~ "[sv]d[a-z]" { print $2; exit }'
+    virsh -q domblklist {{ domain.1.name|quote }} | awk '$1 ~ "[sv]d[a-z]" { print $2 }'
   register: reg_blklist
   delegate_to: "{{ domain.0.src }}"
   changed_when: false
@@ -21,13 +9,20 @@
 - name: "{{ domain.1.name }}: fail if unable get block device"
   fail:
     msg: "UNABLE GET BLOCK DEVICE PATH FOR DOMAIN '{{ domain.1.name }}'"
-  when: reg_blklist.stdout|d('') == ""
+  when: reg_blklist.stdout_lines|length == 0
 
-- name: "{{ domain.1.name }}: set fact (boot_dev)"
+- name: "{{ domain.1.name }}: set fact (boot_dev list)"
   set_fact:
-    boot_dev: "{{ reg_blklist.stdout }}"
+    boot_dev: "{{ reg_blklist.stdout_lines }}"
 
-- name: "{{ domain.1.name }}: set fact (lv_dev)"
+- name: "{{ domain.1.name }}: fail if bad disks count"
+  fail:
+    msg: "LUKS USED AND DOMAIN {{ domain.1.name|quote }} DISKS COUNT ({{ reg_blk_count.stdout }}) IS NOT 1"
+  when:
+    - boot_dev|length > 1
+    - domain.1.lv is defined
+
+- name: "{{ domain.1.name }}: set fact (lvol_dev list)"
   set_fact:
     lvol_dev: "{{ (domain.1.lv is defined)|ternary(domain.1.lv|d(''),boot_dev) }}"
 

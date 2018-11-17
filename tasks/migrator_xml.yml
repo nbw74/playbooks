@@ -28,9 +28,10 @@
 
 - name: "{{ domain.1.name }}: virt-xml disk path (plain)"
   command: >
-    virt-xml {{ domain.1.name }} -q --edit --disk path=/dev/{{ domain.0.vg }}/{{ lvol_dev|basename }}
+    virt-xml {{ domain.1.name }} -q --edit {{ item|int + 1 }} --disk path=/dev/{{ domain.0.vg }}/{{ lvol_dev[item|int]|basename }}
   delegate_to: "{{ domain.0.dest }}"
   when: domain.1.lv is not defined
+  with_sequence: start=0 end="{{ lvol_dev|length - 1 }}"
 
 - name: "{{ domain.1.name }}: virt-xml remove cdrom"
   command: >
@@ -54,8 +55,10 @@
 
     - name: "{{ domain.1.name }}: virt-xml disk bus"
       command: >
-        virt-xml {{ domain.1.name }} -q --edit --disk target=sda,bus=scsi,cache=none,discard=unmap,address.type=drive,address.bus=0,address.unit=0
+        virt-xml {{ domain.1.name }} -q --edit {{ item|int + 1 }}
+        --disk target=sd{{ letters[item|int] }},bus=scsi,cache=none,discard=unmap,address.type=drive,address.bus=0,address.unit={{ item }}
       delegate_to: "{{ domain.0.dest }}"
+      with_sequence: start=0 end="{{ lvol_dev|length - 1 }}"
   when: trim_dest
 
 - name: Block for dest without trim support
@@ -71,8 +74,10 @@
 
     - name: "{{ domain.1.name }}: virt-xml disk bus"
       command: >
-        virt-xml {{ domain.1.name }} -q --edit --disk target=vda,bus=virtio,cache=none,discard=,address.type=pci,address.bus=0x00,address.unit=
+        virt-xml {{ domain.1.name }} -q --edit {{ item|int + 1 }}
+        --disk target=vd{{ letters[item|int] }},bus=virtio,cache=none,discard=,address.type=pci,address.bus=0x00,address.unit=
       delegate_to: "{{ domain.0.dest }}"
+      with_sequence: start=0 end="{{ lvol_dev|length - 1 }}"
   when: not trim_dest
 
 ...

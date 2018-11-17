@@ -1,0 +1,73 @@
+---
+- name: Local facts
+  set_fact:
+    lvbase: "{{ lv|basename }}"
+
+- name: Copy domain image with errors handling
+  block:
+    - name: "{{ domain.1.name }}:{{ lvbase }} run receiver on dest"
+      shell: >
+        nc -l {{ migrate_nc_port }} | dd of=/dev/{{ domain.0.vg }}/{{ lvbase }} bs=4M
+      async: 86400
+      poll: 0
+      delegate_to: "{{ domain.0.dest }}"
+      become: true
+      register: reg_receiver_async
+
+    - name: "{{ domain.1.name }}:{{ lvbase }} run transmitter on src"
+      shell: >
+        dd if={{ lv }} bs=4M | nc {{ domain.0.dest_ip|d(domain.0.dest) }} {{ migrate_nc_port }}
+      async: 86400
+      poll: 0
+      delegate_to: "{{ domain.0.src }}"
+      become: true
+      register: reg_transmitter_async
+
+    - name: "{{ domain.1.name }}:{{ lvbase }} check transmitter result"
+      async_status:
+        jid: "{{ reg_transmitter_async.ansible_job_id }}"
+      register: reg_transmitter
+      until: reg_transmitter.finished
+      retries: 1440
+      delay: 60
+      delegate_to: "{{ domain.0.src }}"
+      become: true
+
+    - name: "{{ domain.1.name }}:{{ lvbase }} check receiver result"
+      async_status:
+        jid: "{{ reg_receiver_async.ansible_job_id }}"
+      register: reg_receiver
+      until: reg_receiver.finished
+      retries: 200
+      delay: 5
+      delegate_to: "{{ domain.0.dest }}"
+      become: true
+
+    - name: "{{ domain.1.name }}:{{ lvbase }} print transmit/receive results"
+      debug:
+        msg:
+          - "{{ reg_transmitter.stderr }}"
+          - "{{ reg_receiver.stderr }}"
+  rescue:
+    - name: "{{ domain.1.name }}:{{ lvbase }} kill receiver process"
+      command: >
+        pkill -fx "nc -l {{ migrate_nc_port }}"
+      delegate_to: "{{ domain.0.dest }}"
+      become: true
+      ignore_errors: true
+
+    - pause:
+        seconds: 4
+
+    - name: "{{ domain.1.name }}:{{ lvbase }} delete lv"
+      lvol:
+        lv: "{{ lvbase }}"
+        vg: "{{ domain.0.vg }}"
+        state: absent
+        force: true
+      delegate_to: "{{ domain.0.dest }}"
+      become: true
+
+    - fail:
+        msg: "LV DUMP FAILED"
+...

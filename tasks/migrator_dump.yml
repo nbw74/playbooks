@@ -1,90 +1,58 @@
 ---
-- name: "{{ domain.1.name }}: get lv size"
-  shell: >
-    lvs --noheadings --quiet --units b -o lv_size {{ lvol_dev|quote }}
+- name: "{{ domain.1.name }}: get lv sizes"
+  command: >
+    lvs --noheadings --quiet --units b -o lv_size {{ item|quote }}
   register: reg_lv_size
   delegate_to: "{{ domain.0.src }}"
   become: true
   changed_when: false
+  with_items: "{{ lvol_dev }}"
 
-- name: "{{ domain.1.name }}: set lv size"
+- name: "{{ domain.1.name }}: set lv sizes (dict)"
   set_fact:
-    lvol_size: "{{ reg_lv_size.stdout|trim }}"
+    lvol_size: "{{ lvol_size|d({})|combine( {item.item: item.stdout|trim} ) }}"
+  with_items: "{{ reg_lv_size.results }}"
+  loop_control:
+    label: "{{ item.item }}:{{ item.stdout }}"
 
 - name: "{{ domain.1.name }}: check if dest lv already exists"
   stat:
-    path: "/dev/{{ domain.0.vg }}/{{ lvol_dev|basename }}"
+    path: "/dev/{{ domain.0.vg }}/{{ item|basename }}"
   delegate_to: "{{ domain.0.dest }}"
   become: true
   register: reg_lv_stat
+  with_items: "{{ lvol_dev }}"
 
 - name: "{{ domain.1.name }}: fail if dest lv already exists"
   fail:
-    msg: "LOGICAL VOLUME '{{ reg_lv_stat.stat.path }}' ALREADY EXISTS"
-  when: reg_lv_stat.stat.exists
+    msg: "LOGICAL VOLUME '/dev/{{ domain.0.vg }}/{{ item.item|basename }}' ALREADY EXISTS"
+  when: item.stat.exists
+  with_items: "{{ reg_lv_stat.results }}"
+  loop_control:
+    label: "{{ item.item|basename }}:{{ item.stat.exists }}"
+
+- name: ansible_local fact
+  set_fact:
+    ansible_local: []
+  when: ansible_local is not defined
 
 - name: "{{ domain.1.name }}: create lv"
   lvol:
-    lv: "{{ lvol_dev|basename }}"
-    size: "{{ lvol_size }}"
+    lv: "{{ item.key|basename }}"
+    size: "{{ item.value }}"
     vg: "{{ domain.0.vg }}"
+    opts: "{{ (ansible_local.common|default(dict(lvol_opts='')))['lvol_opts']|d('') }}"
   delegate_to: "{{ domain.0.dest }}"
+  delegate_facts: true
   become: true
+  with_dict: "{{ lvol_size }}"
+  loop_control:
+    label: "/dev/{{ domain.0.vg }}/{{ item.key|basename }}"
 
-- name: Copy domain image with errors handling
-  block:
-    - name: "{{ domain.1.name }}: run receiver on dest"
-      shell: >
-        nc -l {{ migrate_nc_port }} | dd of=/dev/{{ domain.0.vg }}/{{ lvol_dev|basename }} bs=4M
-      async: 86400
-      poll: 0
-      delegate_to: "{{ domain.0.dest }}"
-      become: true
-      register: reg_receiver_async
+- name: "{{ domain.1.name }}: include transmit tasks"
+  include_tasks: migrator_transmit.yml
+  with_items: "{{ lvol_dev }}"
+  loop_control:
+    loop_var: lv
 
-    - name: "{{ domain.1.name }}: run transmitter on src"
-      shell: >
-        dd if={{ lvol_dev }} bs=4M | nc {{ domain.0.dest_ip|d(domain.0.dest) }} {{ migrate_nc_port }}
-      async: 86400
-      delegate_to: "{{ domain.0.src }}"
-      become: true
-      register: reg_transmitter
-
-    - name: "{{ domain.1.name }}: check receiver result"
-      async_status:
-        jid: "{{ reg_receiver_async.ansible_job_id }}"
-      register: reg_receiver
-      until: reg_receiver.finished
-      retries: 100
-      delay: 5
-      delegate_to: "{{ domain.0.dest }}"
-      become: true
-
-    - name: "{{ domain.1.name }}: print transmit/receive results"
-      debug:
-        msg:
-          - "{{ reg_transmitter.stderr }}"
-          - "{{ reg_receiver.stderr }}"
-  rescue:
-    - name: "{{ domain.1.name }}: kill receiver process"
-      command: >
-        pkill -fx "nc -l {{ migrate_nc_port }}"
-      delegate_to: "{{ domain.0.dest }}"
-      become: true
-      ignore_errors: true
-
-    - pause:
-        seconds: 4
-
-    - name: "{{ domain.1.name }}: delete lv"
-      lvol:
-        lv: "{{ lvol_dev|basename }}"
-        vg: "{{ domain.0.vg }}"
-        state: absent
-        force: true
-      delegate_to: "{{ domain.0.dest }}"
-      become: true
-
-    - fail:
-        msg: "LV DUMP FAILED"
 ...

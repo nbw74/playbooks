@@ -24,12 +24,13 @@
 
     - name: "{{ domain.1.name }}: delete lv on src"
       lvol:
-        lv: "{{ lvol_dev|basename }}"
-        vg: "{{ lvol_dev|dirname|basename }}"
+        lv: "{{ item|basename }}"
+        vg: "{{ item|dirname|basename }}"
         state: absent
         force: true
       delegate_to: "{{ domain.0.src }}"
       become: true
+      with_items: "{{ lvol_dev }}"
 
   when: domain.1.lv is not defined
 ...
