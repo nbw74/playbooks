@@ -31,10 +31,9 @@
   loop_control:
     label: "{{ item.item|basename }}:{{ item.stat.exists }}"
 
-- name: ansible_local fact
-  set_fact:
-    ansible_local: []
-  when: ansible_local is not defined
+- name: "{{ domain.1.name }}: gather facts from dest"
+  setup:
+  delegate_to: "{{ domain.0.dest }}"
 
 - name: "{{ domain.1.name }}: create lv"
   lvol:
