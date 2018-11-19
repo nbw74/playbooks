@@ -8,6 +8,10 @@
   changed_when: false
   with_items: "{{ lvol_dev }}"
 
+- name: "{{ domain.1.name }}: cleanup lvol_size dict from previous iteration"
+  set_fact:
+    lvol_size: {}
+
 - name: "{{ domain.1.name }}: set lv sizes (dict)"
   set_fact:
     lvol_size: "{{ lvol_size|d({})|combine( {item.item: item.stdout|trim} ) }}"
