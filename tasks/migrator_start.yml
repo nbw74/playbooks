@@ -30,6 +30,7 @@
         force: true
       delegate_to: "{{ domain.0.src }}"
       become: true
+      when: not domain.1.keep_lv|d()
       with_items: "{{ lvol_dev }}"
 
   when: domain.1.lv is not defined

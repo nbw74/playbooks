@@ -77,7 +77,7 @@
       shell: >
         virsh -q domifaddr {{ domain.1.name|quote }} --source agent | awk '$3 == "ipv4" { print $4 }'
       register: reg_ifaddr
-      when: domain.ip is not defined
+      when: domain.1.ip is not defined
       delegate_to: "{{ domain.0.src }}"
       until: reg_ifaddr.stdout_lines|length > 1
       retries: 10
@@ -87,6 +87,7 @@
     - debug:
         msg:
           - "reg_ifaddr.stdout_lines: {{ reg_ifaddr.stdout_lines }}"
+      when: domain.1.ip is not defined
 
     - name: "{{ domain.1.name }}: set health check ipv4 (if private)"
       set_fact:
@@ -102,6 +103,11 @@
         - health_ipaddr|d('noaddress') == 'noaddress'
         - domain.1.ip is not defined
         - reg_ifaddr.stdout_lines|length > 0
+
+    - name: "{{ domain.1.name }}: set health check ipv4 if defined apparently"
+      set_fact:
+        health_ipaddr: "{{ domain.1.ip }}"
+      when: domain.1.ip is defined
 
     - name: "{{ domain.1.name }}: fail if health check ipv4 still not defined"
       fail:
