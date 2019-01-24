@@ -63,6 +63,13 @@
 
 - name: Block for dest without trim support
   block:
+    - name: "{{ domain.1.name }}: virt-xml disk bus"
+      command: >
+        virt-xml {{ domain.1.name }} -q --edit {{ item|int + 1 }}
+        --disk target=vd{{ letters[item|int] }},bus=virtio,cache=none,discard=,address.type=pci,address.bus=0x00,address.unit=
+      delegate_to: "{{ domain.0.dest }}"
+      with_sequence: start=0 end="{{ lvol_dev|length - 1 }}"
+
     - name: "{{ domain.1.name }}: virt-xml scsi-virtio"
       command: >
         virt-xml {{ domain.1.name }} -q --remove-device --controller type=scsi,model=virtio-scsi
@@ -71,13 +78,6 @@
       failed_when: 
         - reg_vx_scsi.failed
         - reg_vx_scsi.stderr.find('No matching objects found for') == -1
-
-    - name: "{{ domain.1.name }}: virt-xml disk bus"
-      command: >
-        virt-xml {{ domain.1.name }} -q --edit {{ item|int + 1 }}
-        --disk target=vd{{ letters[item|int] }},bus=virtio,cache=none,discard=,address.type=pci,address.bus=0x00,address.unit=
-      delegate_to: "{{ domain.0.dest }}"
-      with_sequence: start=0 end="{{ lvol_dev|length - 1 }}"
   when: not trim_dest
 
 ...
