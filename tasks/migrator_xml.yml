@@ -16,7 +16,7 @@
 
 - name: "{{ domain.1.name }}: set right emulator"
   xml:
-    xmlstring: "{{ reg_dest_xml_a.get_xml }}"
+    xmlstring: "{{ reg_dest_xml_a.xmlstring }}"
     xpath: "/domain/devices/emulator"
     value: "/usr/libexec/qemu-kvm"
   register: reg_dest_xml_b
