@@ -11,14 +11,22 @@
     xmlstring: "{{ reg_src_xml.get_xml }}"
     xpath: "/*/*/*/address"
     state: absent
-  register: reg_dest_xml
+  register: reg_dest_xml_a
+  delegate_to: "{{ domain.0.dest }}"
+
+- name: "{{ domain.1.name }}: set right emulator"
+  xml:
+    xmlstring: "{{ reg_dest_xml_a.get_xml }}"
+    xpath: "/domain/devices/emulator"
+    value: "/usr/libexec/qemu-kvm"
+  register: reg_dest_xml_b
   delegate_to: "{{ domain.0.dest }}"
 
 - name: "{{ domain.1.name }}: virt define"
   virt:
     name: "{{ domain.1.name }}"
     command: define
-    xml: "{{ reg_dest_xml.xmlstring }}"
+    xml: "{{ reg_dest_xml_b.xmlstring }}"
   delegate_to: "{{ domain.0.dest }}"
 
 - name: "{{ domain.1.name }}: virt-xml cpu"
