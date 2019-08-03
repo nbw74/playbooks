@@ -1,9 +1,0 @@
----
-- name: httpd vhost actions
-  hosts: all
-  become: yes
-
-  roles:
-    - httpd
-    - vhost
-...

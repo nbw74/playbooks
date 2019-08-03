@@ -3,6 +3,23 @@
   hosts: all
   become: yes
 
-  roles:
-    - vhost
+  tasks:
+    - name: Import httpd role
+      import_role:
+        name: httpd
+      when: puffer|d('bzz') == 'httpd'
+
+    - name: Import php-fpm role
+      import_role:
+        name: php-fpm
+      when: puffer|d('bzz') == 'php-fpm'
+
+    - name: Import bitrix-env role
+      import_role:
+        name: php-fpm
+      when: puffer|d('bzz') == 'bitrix-env'
+
+    - name: Import vhost role
+      import_role:
+        name: vhost
 ...
