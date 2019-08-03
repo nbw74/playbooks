@@ -4,19 +4,19 @@
   become: yes
 
   tasks:
-    - name: Import httpd role
-      import_role:
+    - name: Include httpd role
+      include_role:
         name: httpd
       when: puffer|d('bzz') == 'httpd'
 
-    - name: Import php-fpm role
-      import_role:
+    - name: Include php-fpm role
+      include_role:
         name: php-fpm
       when: puffer|d('bzz') == 'php-fpm'
 
-    - name: Import bitrix-env role
-      import_role:
-        name: php-fpm
+    - name: Include bitrix-env role
+      include_role:
+        name: bitrix-env
       when: puffer|d('bzz') == 'bitrix-env'
 
     - name: Import vhost role
