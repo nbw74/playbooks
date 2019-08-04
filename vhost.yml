@@ -7,20 +7,17 @@
     - name: Include httpd role
       include_role:
         name: httpd
-      when: >
-        'httpd' in server_roles
+      when: "'httpd' in server_roles"
 
     - name: Include php-fpm role
       include_role:
         name: php-fpm
-      when: >
-        'php-fpm' in server_roles
+      when: "'php-fpm' in server_roles"
 
     - name: Include bitrix-env role
       include_role:
         name: bitrix-env
-      when: >
-        'bitrix-env' in server_roles
+      when: "'bitrix-env' in server_roles"
 
     - name: Import vhost role
       import_role:
