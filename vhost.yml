@@ -4,6 +4,13 @@
   become: yes
 
   tasks:
+    - name: Include nginx role
+      include_role:
+        name: nginx
+      when:
+        - "'nginx' in server_roles"
+        - server_roles|length == 1
+
     - name: Include httpd role
       include_role:
         name: httpd
