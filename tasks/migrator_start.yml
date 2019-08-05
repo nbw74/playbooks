@@ -20,6 +20,7 @@
       virt:
         name: "{{ domain.1.name }}"
         command: undefine
+      when: not domain.1.keep_vm|d()
       delegate_to: "{{ domain.0.src }}"
 
     - name: "{{ domain.1.name }}: delete lv on src"

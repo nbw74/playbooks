@@ -4,6 +4,7 @@
 - name: MIGRATE VIRTUAL MACHINES
   hosts: localhost
   gather_facts: false
+  strategy: linear
 
   environment:
     LANG: C

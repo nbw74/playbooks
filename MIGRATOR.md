@@ -14,4 +14,5 @@ migrate_domains:
         ip: guest_ipv4 # optional; set if `Windows' or if qemu-ga is not running
         skip: bool # default: false
         keep_lv: bool # don't remove source LV after migration; default: false
+        keep_vm: bool # don't undefine source VM after migration; default: false
 ```
