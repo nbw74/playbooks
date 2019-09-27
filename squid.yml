@@ -1,8 +1,0 @@
----
-- name: "Squid proxy-server (common configuration)"
-  hosts: all
-  become: yes
-
-  roles:
-    - { role: squid }
-...

@@ -1,8 +1,0 @@
----
-- name: "LINUX BRIDGE"
-  hosts: all
-  become: yes
-
-  roles:
-    - bridge
-...

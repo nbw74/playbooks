@@ -1,8 +1,0 @@
----
-- name: "PostgreSQL WAL archive"
-  hosts: all
-  become: yes
-
-  roles:
-    - { role: postgresql-wal-archive }
-...

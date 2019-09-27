@@ -1,4 +1,5 @@
 ---
+# vim: set ft=yaml.ansible:
 - name: "NGINX VIRTUAL HOSTS"
   hosts: all
   become: yes
@@ -7,29 +8,25 @@
     - name: Include nginx role
       include_role:
         name: nginx
-      when:
-        - "'nginx' in server_roles"
-        - server_roles|length == 1
+      when: inventory_hostname in groups['nginx']
 
     - name: Include httpd role
       include_role:
         name: httpd
-      when: >
-        'httpd' in server_roles
+      when: inventory_hostname in groups['httpd']
 
     - name: Include php-fpm role
       include_role:
         name: php-fpm
-      when: >
-        'php-fpm' in server_roles
+      when: inventory_hostname in groups['php_fpm']
 
     - name: Include bitrix-env role
       include_role:
         name: bitrix-env
-      when: >
-        'bitrix-env' in server_roles
+      when: inventory_hostname in groups['bitrix']
 
     - name: Import vhost role
       import_role:
         name: vhost
+      when: inventory_hostname in groups['nginx']
 ...

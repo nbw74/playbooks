@@ -1,8 +1,0 @@
----
-- name: "NGINX"
-  hosts: all
-  become: yes
-
-  roles:
-    - { role: nginx }
-...

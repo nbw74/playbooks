@@ -1,8 +1,0 @@
----
-- name: "SELinux for web-servers"
-  hosts: all
-  become: yes
-
-  roles:
-    - selinux-for-web
-...

@@ -13,6 +13,11 @@
   hosts: all
   become: yes
 
-  roles:
-    - { role: common }
+  vars:
+    ansible_user: root
+
+  tasks:
+    - name: Common bootstrap
+      import_tasks:
+        name: common
 ...

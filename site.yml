@@ -1,0 +1,87 @@
+---
+# vim: set ft=yaml.ansible:
+- name: Apply roles to all hosts
+  hosts: all
+  become: yes
+
+  vars:
+    ansible_user: "{{ lookup('env', 'USER') }}"
+
+  tasks:
+    - name: Include base role
+      include_role:
+        name: common
+
+    - name: Include selinux-for-web role
+      include_role:
+        name: selinux-for-web
+      when: inventory_hostname in groups['selinux_web']
+
+    - name: Include ftpd role
+      include_role:
+        name: ftpd
+      when: inventory_hostname in groups['ftpd']
+
+    - name: Include memcached role
+      include_role:
+        name: memcached
+      when: inventory_hostname in groups['memcached']
+
+    - name: Include nodejs role
+      include_role:
+        name: nodejs
+      when: inventory_hostname in groups['nodejs']
+
+    - name: Include nginx role
+      include_role:
+        name: nginx
+      when: inventory_hostname in groups['nginx']
+
+    - name: Include httpd role
+      include_role:
+        name: httpd
+      when: inventory_hostname in groups['httpd']
+
+    - name: Include php-fpm role
+      include_role:
+        name: php-fpm
+      when: inventory_hostname in groups['php_fpm']
+
+    - name: Include bitrix-env role
+      include_role:
+        name: bitrix-env
+      when: inventory_hostname in groups['bitrix']
+
+    - name: Include vhost role
+      include_role:
+        name: vhost
+      when:
+        - inventory_hostname in groups['nginx'] or inventory_hostname in groups['bitrix']
+        - vhost|d([])|length > 0
+
+    - name: Include postgresql role
+      include_role:
+        name: postgresql
+      when: inventory_hostname in groups['postgresql']
+
+    - name: Include pgbouncer role
+      include_role:
+        name: pgbouncer
+      when: inventory_hostname in groups['pgbouncer']
+
+    - name: Include postgresql-wal-archive role
+      include_role:
+        name: postgresql-wal-archive
+      when: inventory_hostname in groups['pg_wal_archive']
+
+    - name: Include postgresql-logging-collector role
+      include_role:
+        name: postgresql-logging-collector
+      when: inventory_hostname in groups['pg_log_collector']
+
+    - name: Include icinga2 role
+      include_role:
+        name: icinga2
+      when: inventory_hostname in groups['icinga2_nodes']
+
+...
