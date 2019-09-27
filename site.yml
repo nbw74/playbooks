@@ -4,9 +4,6 @@
   hosts: all
   become: yes
 
-  vars:
-    ansible_user: "{{ lookup('env', 'USER') }}"
-
   tasks:
     - name: Include base role
       include_role:
