@@ -14,6 +14,26 @@
         name: selinux-for-web
       when: inventory_hostname in groups['selinux_web']
 
+    - name: Include postgresql role
+      include_role:
+        name: postgresql
+      when: inventory_hostname in groups['postgresql']
+
+    - name: Include pgbouncer role
+      include_role:
+        name: pgbouncer
+      when: inventory_hostname in groups['pgbouncer']
+
+    - name: Include postgresql-wal-archive role
+      include_role:
+        name: postgresql-wal-archive
+      when: inventory_hostname in groups['pg_wal_archive']
+
+    - name: Include postgresql-logging-collector role
+      include_role:
+        name: postgresql-logging-collector
+      when: inventory_hostname in groups['pg_log_collector']
+
     - name: Include ftpd role
       include_role:
         name: ftpd
@@ -55,26 +75,6 @@
       when:
         - inventory_hostname in groups['nginx'] or inventory_hostname in groups['bitrix']
         - vhost|d([])|length > 0
-
-    - name: Include postgresql role
-      include_role:
-        name: postgresql
-      when: inventory_hostname in groups['postgresql']
-
-    - name: Include pgbouncer role
-      include_role:
-        name: pgbouncer
-      when: inventory_hostname in groups['pgbouncer']
-
-    - name: Include postgresql-wal-archive role
-      include_role:
-        name: postgresql-wal-archive
-      when: inventory_hostname in groups['pg_wal_archive']
-
-    - name: Include postgresql-logging-collector role
-      include_role:
-        name: postgresql-logging-collector
-      when: inventory_hostname in groups['pg_log_collector']
 
     - name: Include icinga2 role
       include_role:
