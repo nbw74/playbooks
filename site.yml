@@ -89,6 +89,6 @@
     - name: Include icinga2 role
       include_role:
         name: icinga2
-      when: inventory_hostname in groups['icinga2_nodes']
+      when: inventory_hostname in groups['icinga2']
 
 ...
