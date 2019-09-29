@@ -11,7 +11,7 @@
 
     - name: Include kvm role
       include_role:
-        name: ftpd
+        name: kvm
       when: inventory_hostname in groups['kvm']
 
     - name: Include selinux-for-web role
