@@ -1,4 +1,5 @@
 ---
+# vim: set ft=yaml.ansible:
 #####
 # BEFORE INSTALL
 #
@@ -9,15 +10,16 @@
 # CentOS 7: set hostname in localhost.localdomain
 #
 
-- name: "CENTOS COMMON"
+- name: "CENTOS BOOTSTRAP"
   hosts: all
   become: yes
 
   vars:
     ansible_user: root
+    pkgupdate: True
 
   tasks:
     - name: Common bootstrap
-      import_tasks:
+      import_role:
         name: common
 ...

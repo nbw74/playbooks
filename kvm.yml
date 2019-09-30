@@ -1,9 +1,0 @@
----
-- name: "QEMU-KVM HYPERVISOR"
-  hosts: all
-  strategy: linear
-  become: yes
-
-  roles:
-    - kvm
-...

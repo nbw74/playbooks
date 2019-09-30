@@ -1,8 +1,14 @@
 ---
+# vim: set ft=yaml.ansible:
 - name: "MY ENVIRONMENT"
   hosts: all
   become: no
 
-  roles:
-    - { role: myenv }
+  vars:
+    ansible_user: "{{ lookup('env', 'USER') }}"
+
+  tasks:
+    - name: Import myenv
+      import_role:
+        name: myenv
 ...

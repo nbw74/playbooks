@@ -1,6 +1,6 @@
 ---
 # vim: set ft=yaml.ansible:
-- name: Apply roles to all hosts
+- name: Apply all roles
   hosts: all
   become: yes
 
