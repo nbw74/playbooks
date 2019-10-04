@@ -15,7 +15,7 @@
     - name: Include kvm role
       include_role:
         name: kvm
-      when: inventory_hostname in groups['kvm']
+      when: inventory_hostname in groups['kvm'] or inventory_hostname in groups['kvm_aliens']
 
     - name: Include selinux-for-web role
       include_role:
