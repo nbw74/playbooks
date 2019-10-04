@@ -4,6 +4,9 @@
   hosts: all
   become: yes
 
+  vars:
+    ansible_user: anrunner
+
   tasks:
     - name: Include base role
       include_role:
