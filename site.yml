@@ -27,6 +27,11 @@
         name: ftpd
       when: inventory_hostname in groups['ftpd']
 
+    - name: Include gitlab-runner role
+      include_role:
+        name: gitlab-runner
+      when: inventory_hostname in groups['runners']
+
     - name: Include memcached role
       include_role:
         name: memcached
