@@ -17,6 +17,11 @@
         name: kvm
       when: inventory_hostname in groups['kvm'] or inventory_hostname in groups['kvm_aliens']
 
+    - name: Include systemd-nspawn role
+      include_role:
+        name: systemd-nspawn
+      when: inventory_hostname in groups['nspawn']
+
     - name: Include selinux-for-web role
       include_role:
         name: selinux-for-web
