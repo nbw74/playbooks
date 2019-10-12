@@ -75,12 +75,14 @@
     - name: Include nodejs role
       include_role:
         name: nodejs
-      when: inventory_hostname in groups['nodejs']
+      when: >
+        inventory_hostname in groups['nodejs'] or
+        inventory_hostname in groups['build_runners']
 
     - name: Include php role
       include_role:
         name: php
-      when: inventory_hostname in groups['build']
+      when: inventory_hostname in groups['build_runners']
 
     - name: Include nginx role
       include_role:
