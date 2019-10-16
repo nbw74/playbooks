@@ -1,0 +1,15 @@
+---
+# vim: set ft=yaml.ansible:
+- name: Apply runners roles
+  hosts: all
+  become: yes
+
+  vars:
+    ansible_user: anrunner
+
+  tasks:
+    - name: Include gitlab-runner role
+      include_role:
+        name: gitlab-runner
+      when: inventory_hostname in groups['runners']
+...
