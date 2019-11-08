@@ -104,9 +104,7 @@
     - name: Include composer role
       include_role:
         name: composer
-      when: >
-        inventory_hostname in groups['build_runners'] or
-        inventory_hostname in groups['deploy_runners']
+      when: inventory_hostname in groups['runners']
 
     - name: Include bitrix-env role
       include_role:

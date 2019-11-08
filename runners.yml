@@ -12,4 +12,9 @@
       include_role:
         name: gitlab-runner
       when: inventory_hostname in groups['runners']
+
+    - name: Include composer role
+      include_role:
+        name: composer
+      when: inventory_hostname in groups['runners']
 ...
