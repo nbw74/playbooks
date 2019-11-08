@@ -5,28 +5,7 @@
   become: yes
 
   tasks:
-    - name: Include nginx role
-      include_role:
-        name: nginx
-      when: inventory_hostname in groups['nginx']
-
-    - name: Include httpd role
-      include_role:
-        name: httpd
-      when: inventory_hostname in groups['httpd']
-
-    - name: Include php-fpm role
-      include_role:
-        name: php-fpm
-      when: inventory_hostname in groups['php_fpm']
-
-    - name: Include bitrix-env role
-      include_role:
-        name: bitrix-env
-      when: inventory_hostname in groups['bitrix']
-
     - name: Import vhost role
       import_role:
         name: vhost
-      when: inventory_hostname in groups['nginx']
 ...

@@ -15,7 +15,9 @@
     - name: Include kvm role
       include_role:
         name: kvm
-      when: inventory_hostname in groups['kvm'] or inventory_hostname in groups['kvm_aliens']
+      when: >
+        inventory_hostname in groups['kvm'] or
+        inventory_hostname in groups['kvm_aliens']
 
     - name: Include systemd-nspawn role
       include_role:
@@ -97,6 +99,11 @@
     - name: Include php-fpm role
       include_role:
         name: php-fpm
+      when: inventory_hostname in groups['php_fpm']
+
+    - name: Include composer role
+      include_role:
+        name: composer
       when: inventory_hostname in groups['php_fpm']
 
     - name: Include bitrix-env role
