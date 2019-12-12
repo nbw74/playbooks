@@ -11,8 +11,10 @@
       async: 86400
       poll: 0
       delegate_to: "{{ domain.0.dest }}"
-      become: true
       register: reg_receiver_async
+
+    - pause:
+        seconds: 4
 
     - name: "{{ domain.1.name }}:{{ lvbase }} run transmitter on src"
       shell: >
@@ -20,7 +22,6 @@
       async: 86400
       poll: 0
       delegate_to: "{{ domain.0.src }}"
-      become: true
       register: reg_transmitter_async
 
     - name: "{{ domain.1.name }}:{{ lvbase }} check transmitter result"
@@ -31,7 +32,6 @@
       retries: 1440
       delay: 60
       delegate_to: "{{ domain.0.src }}"
-      become: true
 
     - name: "{{ domain.1.name }}:{{ lvbase }} check receiver result"
       async_status:
@@ -41,7 +41,6 @@
       retries: 200
       delay: 5
       delegate_to: "{{ domain.0.dest }}"
-      become: true
 
     - name: "{{ domain.1.name }}:{{ lvbase }} print transmit/receive results"
       debug:
@@ -53,7 +52,6 @@
       command: >
         pkill -fx "nc -l {{ migrate_nc_port }}"
       delegate_to: "{{ domain.0.dest }}"
-      become: true
       ignore_errors: true
 
     - pause:
@@ -66,8 +64,8 @@
         state: absent
         force: true
       delegate_to: "{{ domain.0.dest }}"
-      become: true
 
     - fail:
         msg: "LV DUMP FAILED"
+  become: true
 ...

@@ -118,6 +118,10 @@
       command: >
         ping -i0.2 -W1 -c3 {{ health_ipaddr|ipv4('address')|quote }}
       changed_when: false
+      register: reg_ping_init
+      until: not reg_ping_init.failed
+      retries: 5
+      delay: 5
 
   when: domain.1.lv is not defined
 ...

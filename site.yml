@@ -84,7 +84,9 @@
     - name: Include php role
       include_role:
         name: php
-      when: inventory_hostname in groups['build_runners']
+      when: >
+        inventory_hostname in groups['build_runners'] or
+        inventory_hostname in groups['unit']
 
     - name: Include nginx role
       include_role:
@@ -100,6 +102,18 @@
       include_role:
         name: php-fpm
       when: inventory_hostname in groups['php_fpm']
+
+#     - name: Include unit
+#       include_role:
+#         name: unit
+#       when: inventory_hostname in groups['unit']
+# 
+#     - name: Include unit-devel
+#       include_role:
+#         name: unit
+#         apply:
+#           tags: [ devel ]
+#       when: inventory_hostname in groups['build_unit']
 
     - name: Include composer role
       include_role:
