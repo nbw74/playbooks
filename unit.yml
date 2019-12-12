@@ -1,0 +1,11 @@
+---
+# vim: set ft=yaml.ansible:
+- name: "NGINX UNIT"
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Import unit role
+      import_role:
+        name: unit
+...

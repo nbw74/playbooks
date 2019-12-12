@@ -103,17 +103,16 @@
         name: php-fpm
       when: inventory_hostname in groups['php_fpm']
 
-#     - name: Include unit
-#       include_role:
-#         name: unit
-#       when: inventory_hostname in groups['unit']
-# 
-#     - name: Include unit-devel
-#       include_role:
-#         name: unit
-#         apply:
-#           tags: [ devel ]
-#       when: inventory_hostname in groups['build_unit']
+    - name: Include unit
+      include_role:
+        name: unit
+      when: inventory_hostname in groups['unit']
+
+    - name: Include unit-devel
+      include_role:
+        name: unit
+        tasks_from: packages.yml
+      when: inventory_hostname in groups['build_unit']
 
     - name: Include composer role
       include_role:
