@@ -19,6 +19,11 @@
         inventory_hostname in groups['kvm'] or
         inventory_hostname in groups['kvm_aliens']
 
+    - name: Include ct/docker role
+      include_role:
+        name: ct/docker
+      when: inventory_hostname in groups['docker']
+
     - name: Include ct/systemd-nspawn role
       include_role:
         name: ct/systemd-nspawn
