@@ -13,8 +13,8 @@
         name: gitlab-runner
       when: inventory_hostname in groups['runners']
 
-    - name: Include composer role
+    - name: Include web/composer role
       include_role:
-        name: composer
+        name: web/composer
       when: inventory_hostname in groups['runners']
 ...

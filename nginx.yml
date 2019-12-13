@@ -1,12 +1,12 @@
 ---
 # vim: set ft=yaml.ansible:
-- name: Apply web/composer role
+- name: Apply web/nginx role
   hosts: all
   become: yes
 
   tasks:
-    - name: Include web/composer role
+    - name: Include web/nginx role
       include_role:
-        name: web/composer
+        name: web/nginx
       when: inventory_hostname in groups['nginx']
 ...

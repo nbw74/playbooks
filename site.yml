@@ -19,19 +19,19 @@
         inventory_hostname in groups['kvm'] or
         inventory_hostname in groups['kvm_aliens']
 
-    - name: Include systemd-nspawn role
+    - name: Include ct/systemd-nspawn role
       include_role:
-        name: systemd-nspawn
+        name: ct/systemd-nspawn
       when: inventory_hostname in groups['nspawn']
 
-    - name: Include selinux-for-web role
+    - name: Include web/selinux-for-web role
       include_role:
-        name: selinux-for-web
+        name: web/selinux-for-web
       when: inventory_hostname in groups['selinux_web']
 
-    - name: Include ftpd role
+    - name: Include web/ftpd role
       include_role:
-        name: ftpd
+        name: web/ftpd
       when: inventory_hostname in groups['ftpd']
 
     - name: Include gitlab-runner role
@@ -54,79 +54,79 @@
         name: redis
       when: inventory_hostname in groups['redis']
 
-    - name: Include postgresql role
+    - name: Include pg/postgresql role
       include_role:
-        name: postgresql
+        name: pg/postgresql
       when: inventory_hostname in groups['postgresql']
 
-    - name: Include pgbouncer role
+    - name: Include pg/pgbouncer role
       include_role:
-        name: pgbouncer
+        name: pg/pgbouncer
       when: inventory_hostname in groups['pgbouncer']
 
-    - name: Include postgresql-wal-archive role
+    - name: Include pg/postgresql-wal-archive role
       include_role:
-        name: postgresql-wal-archive
+        name: pg/postgresql-wal-archive
       when: inventory_hostname in groups['pg_wal_archive']
 
-    - name: Include postgresql-logging-collector role
+    - name: Include pg/postgresql-logging-collector role
       include_role:
-        name: postgresql-logging-collector
+        name: pg/postgresql-logging-collector
       when: inventory_hostname in groups['pg_log_collector']
 
-    - name: Include nodejs role
+    - name: Include web/nodejs role
       include_role:
-        name: nodejs
+        name: web/nodejs
       when: >
         inventory_hostname in groups['nodejs'] or
         inventory_hostname in groups['build_runners']
 
-    - name: Include php role
+    - name: Include web/php role
       include_role:
-        name: php
+        name: web/php
       when: >
         inventory_hostname in groups['build_runners'] or
         inventory_hostname in groups['unit']
 
-    - name: Include nginx role
+    - name: Include web/nginx role
       include_role:
-        name: nginx
+        name: web/nginx
       when: inventory_hostname in groups['nginx']
 
-    - name: Include httpd role
+    - name: Include web/httpd role
       include_role:
-        name: httpd
+        name: web/httpd
       when: inventory_hostname in groups['httpd']
 
-    - name: Include php-fpm role
+    - name: Include web/php-fpm role
       include_role:
-        name: php-fpm
+        name: web/php-fpm
       when: inventory_hostname in groups['php_fpm']
 
-    - name: Include unit
+    - name: Include web/unit role
       include_role:
-        name: unit
+        name: web/unit
       when: inventory_hostname in groups['unit']
 
     - name: Include unit-devel
       include_role:
-        name: unit
+        name: web/unit
         tasks_from: packages.yml
       when: inventory_hostname in groups['build_unit']
 
-    - name: Include composer role
+    - name: Include web/composer role
       include_role:
-        name: composer
+        name: web/composer
       when: inventory_hostname in groups['runners']
 
-    - name: Include bitrix-env role
+    - name: Include web/bitrix-env role
       include_role:
-        name: bitrix-env
+        name: web/bitrix-env
       when: inventory_hostname in groups['bitrix']
 
-    - name: Include vhost role
+    - name: Include web/vhost role
       include_role:
-        name: vhost
+        name: web/vhost
       when:
         - inventory_hostname in groups['nginx'] or inventory_hostname in groups['bitrix']
         - vhost|d([])|length > 0

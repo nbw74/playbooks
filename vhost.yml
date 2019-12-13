@@ -5,7 +5,7 @@
   become: yes
 
   tasks:
-    - name: Import vhost role
+    - name: Import web/vhost role
       import_role:
-        name: vhost
+        name: web/vhost
 ...
