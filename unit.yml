@@ -5,7 +5,7 @@
   become: yes
 
   tasks:
-    - name: Import unit role
+    - name: Import web/unit role
       import_role:
-        name: unit
+        name: web/unit
 ...

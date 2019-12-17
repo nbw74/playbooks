@@ -113,6 +113,12 @@
         name: web/unit
       when: inventory_hostname in groups['unit']
 
+    - name: Include laravel tasks
+      include_role:
+        name: web/php-fpm
+        tasks_from: laravel.yml
+      when: inventory_hostname in groups['unit']
+
     - name: Include unit-devel
       include_role:
         name: web/unit
