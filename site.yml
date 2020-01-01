@@ -59,6 +59,11 @@
         name: redis
       when: inventory_hostname in groups['redis']
 
+    - name: Include mysql role
+      include_role:
+        name: mysql
+      when: inventory_hostname in groups['mysql']
+
     - name: Include pg/postgresql role
       include_role:
         name: pg/postgresql
