@@ -1,0 +1,118 @@
+---
+- name: Set R/O facts
+  set_fact:
+    privs_default: SELECT
+  when: >
+    role['name'] == 'readaccess'
+
+- name: Set R/W facts
+  set_fact:
+    privs_default: ALL
+  when: >
+    role['name'] == 'writeaccess'
+
+- name: Create roles
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    role_attr_flags: "{{ item.flags }}"
+  loop:
+    - name: "{{ role['name'] }}"
+      password: ~
+      flags: NOLOGIN
+  loop_control:
+    label: "{{ item.name }} : {{ item.flags }}"
+
+- name: Common RO/RW section
+  block:
+    - name: "Grant USAGE on schema to {{ role['name'] }}"
+      postgresql_privs:
+        db: "{{ item.0.name }}"
+        type: schema
+        objs: "{{ item.1.name }}"
+        privs: USAGE
+        role: "{{ role['name'] }}"
+      when: "item.0.name in role['databases']"
+      loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+      loop_control:
+        label: >-
+          {{ item.0.name }}: GRANT USAGE ON SCHEMA {{ item.1.name }} TO {{ role['name'] }}
+
+    - name: "Grant {{ role['privs']|d(privs_default) }} on all tables in schema to {{ role['name'] }}"
+      postgresql_privs:
+        db: "{{ item.0.name }}"
+        type: table
+        schema: "{{ item.1.name }}"
+        privs: "{{ role['privs']|d(privs_default) }}"
+        objs: ALL_IN_SCHEMA
+        role: "{{ role['name'] }}"
+      when: "item.0.name in role['databases']"
+      loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+      loop_control:
+        label: >-
+          {{ item.0.name }}: GRANT {{ role['privs']|d(privs_default) }} ON ALL TABLES
+          IN SCHEMA {{ item.1.name }} TO {{ role['name'] }}
+
+    - name: "Grant {{ role['privs']|d(privs_default) }} on all sequences in schema to {{ role['name'] }}"
+      postgresql_privs:
+        db: "{{ item.0.name }}"
+        type: sequence
+        schema: "{{ item.1.name }}"
+        privs: "{{ role['privs']|d(privs_default) }}"
+        objs: ALL_IN_SCHEMA
+        role: "{{ role['name'] }}"
+      when:
+        - "role['privs']|d(privs_default) == 'ALL'"
+        - "item.0.name in role['databases']"
+      loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+      loop_control:
+        label: >-
+          {{ item.0.name }}: GRANT {{ role['privs']|d(privs_default) }} ON ALL SEQUENCES
+          IN SCHEMA {{ item.1.name }} TO {{ role['name'] }}
+
+    - name: Alter default privileges for role owner
+      postgresql_privs:
+        db: "{{ item.0.name }}"
+        type: default_privs
+        schema: "{{ item.1.name }}"
+        privs: "{{ role['privs']|d(privs_default) }}"
+        objs: "{{ (role['privs']|d(privs_default) == 'ALL') | ternary('TABLES,SEQUENCES','TABLES') }}"
+        role: "{{ role['name'] }}"
+        target_roles: "{{ item.0.owner }}"
+      when:
+        - "item.0.name in role['databases']"
+        - role['default_privs']|d(True)|bool
+      loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+      loop_control:
+        label: >-
+          {{ item.0.name }}: ALTER DEFAULT PRIVILEGES FOR ROLE {{ item.0.owner }}
+          IN SCHEMA {{ item.1.name }} GRANT SELECT ON TABLES TO {{ role['name'] }}
+
+- name: R/W only section
+  block:
+    - name: "Grant CREATE on schema to {{ role['name'] }}"
+      postgresql_privs:
+        db: "{{ item.0.name }}"
+        type: schema
+        objs: "{{ item.1.name }}"
+        privs: CREATE
+        role: "{{ role['name'] }}"
+      when: "item.0.name in role['databases']"
+      loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+      loop_control:
+        label: >-
+          {{ item.0.name }}: GRANT CREATE ON SCHEMA {{ item.1.name }} TO {{ role['name'] }}
+
+    - name: Set full access
+      postgresql_privs:
+        db: postgres
+        privs: "{{ role['privs']|d(privs_default) }}"
+        type: database
+        obj: "{{ item }}"
+        role: "{{ role['name'] }}"
+      loop: "{{ role['databases'] }}"
+      loop_control:
+        label: >-
+          ALL PRIVILEGES ON DATABASE {{ item }} TO {{ role['name'] }}
+  when: "role['privs']|d(privs_default) == 'ALL'"
+...

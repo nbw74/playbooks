@@ -1,0 +1,8 @@
+---
+- name: Get recovery status
+  postgresql_query:
+    query: >
+      SELECT pg_is_in_recovery()
+  register: pg_reg_inrec
+  tags: [ membership ]
+...

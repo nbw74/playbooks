@@ -1,0 +1,40 @@
+---
+- name: Get instance info
+  postgresql_info:
+    filter: "databases,namespaces"
+  register: pg_reg_info
+
+- name: Print reg
+  debug:
+    msg: "{{ pg_reg_info }}"
+  when: debug|d()|bool
+
+- name: Template medium
+  become: no
+  template:
+    src: pg_info_struct.j2
+    dest: "/tmp/pg-struct-{{ ansible_nodename }}.yml"
+  delegate_to: localhost
+  changed_when: false
+
+- name: Read YAML from file
+  become: no
+  shell: >
+    cat /tmp/pg-struct-{{ ansible_nodename }}.yml
+  register: pg_reg_cat
+  delegate_to: localhost
+  changed_when: false
+
+- name: Set structure from yaml
+  set_fact:
+    pg_reg_struct: "{{ pg_reg_cat.stdout|from_yaml_all|list }}"
+
+- name: Print data structure
+  debug:
+    msg: "{{ item.0.name }} :: {{ item.1.name }}"
+  loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: debug|d()|bool
+
+...

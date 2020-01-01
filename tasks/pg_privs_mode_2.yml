@@ -1,0 +1,25 @@
+---
+- name: Create roles
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    role_attr_flags: "{{ item.flags }}"
+  loop:
+    - name: "{{ role['name'] }}"
+      password: ~
+      flags: NOLOGIN
+  loop_control:
+    label: "{{ item.name }} : {{ item.flags }}"
+
+- name: "Grant USAGE on schema to {{ role['name'] }}"
+  postgresql_privs:
+    db: "{{ item.0.name }}"
+    type: schema
+    objs: "{{ item.1.name }}"
+    privs: USAGE
+    role: "{{ role['name'] }}"
+  loop: "{{ role|subelements('schemas') }}"
+  loop_control:
+    label: >-
+      {{ item.0.name }}: GRANT USAGE ON SCHEMA {{ item.1.name }} TO {{ role['name'] }}
+...

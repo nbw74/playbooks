@@ -1,0 +1,73 @@
+---
+# vim: set ft=yaml.ansible:
+# Variables:
+#  
+# postgresql_priv_groups:
+#   - name: string # recommended: readaccess|writeaccess
+#     privs: SELECT|ALL # Required if ['name'] isn't 'readaccess' or 'writeaccess'
+#     databases: []
+#     default_privs: bool # default: true
+#   - name: string
+#     databases:
+#       - name: string
+#         schemas:
+#           - name: string
+#             objects:
+#               - name: string
+#                 privs: SELECT|ALL
+# 
+# postgresql_roles:
+#     ...
+#     groups: []
+
+- name: Create roles with ro/rw database access
+  hosts: all
+  become: yes
+  become_user: postgres
+  strategy: linear
+
+  vars_files:
+    - "{{ lookup('env', 'HOME') }}/playbooks/vars/connect.yml"
+
+  pre_tasks:
+    - name: Verify Ansible version requirements
+      assert:
+        that: "ansible_version.full is version('2.8', '>=')"
+        msg: "You must update Ansible to at least 2.8 to use this playbook"
+
+  tasks:
+    - name: Import recovery
+      import_tasks: tasks/pg_info_recovery.yml
+
+    - name: Check recovery state
+      assert:
+        that: "not pg_reg_inrec.query_result[0].pg_is_in_recovery"
+        msg: "IS IN RECOVERY"
+      tags: [ membership ]
+
+    - name: Include struct
+      include_tasks: tasks/pg_info_get.yml
+
+    - name: Roles loop (mode I)
+      include_tasks: tasks/pg_privs_mode_1.yml
+      loop: "{{ postgresql_priv_groups|selectattr('databases[0].name', 'undefined')|list }}"
+      loop_control:
+        loop_var: role
+        label: "{{ role['name'] }}"
+
+    - name: Roles loop (mode II)
+      include_tasks: tasks/pg_privs_mode_2.yml
+      loop: "{{ postgresql_priv_groups|selectattr('databases[0].name', 'defined')|list }}"
+      loop_control:
+        loop_var: role
+        label: "{{ role['name'] }}"
+
+    - name: Grant roles to users
+      postgresql_membership:
+        group: "{{ item.1 }}"
+        target_roles: "{{ item.0.name }}"
+      loop: "{{ postgresql_roles|subelements('groups', 'skip_missing=True') }}"
+      loop_control:
+        label: "{{ item.0.name }} : {{ item.1 }}"
+      tags: [ membership ]
+...

@@ -1,0 +1,11 @@
+---
+databases:
+{% for key, value in pg_reg_info.databases.iteritems() %}
+  - name: {{ key }}
+    owner: {{ value.owner }}
+    namespaces:
+{% for keyn, valuen in value.namespaces.iteritems() %}
+      - name: {{ keyn }}
+{% endfor %}
+{% endfor %}
+...
