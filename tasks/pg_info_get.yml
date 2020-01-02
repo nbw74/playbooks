@@ -29,12 +29,11 @@
   set_fact:
     pg_reg_struct: "{{ pg_reg_cat.stdout|from_yaml_all|list }}"
 
-- name: Print data structure
-  debug:
-    msg: "{{ item.0.name }} :: {{ item.1.name }}"
-  loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
-  loop_control:
-    label: "{{ item.0.name }}"
-  when: debug|d()|bool
+# - name: Print data structure
+#   debug:
+#     msg: "{{ item.0.name }} :: {{ item.1.name }}"
+#   loop: "{{ pg_reg_struct[0].databases|subelements('namespaces') }}"
+#   loop_control:
+#     label: "{{ item.0.name }}"
 
 ...

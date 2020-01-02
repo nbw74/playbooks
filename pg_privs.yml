@@ -26,9 +26,6 @@
   become_user: postgres
   strategy: linear
 
-  vars_files:
-    - "{{ lookup('env', 'HOME') }}/playbooks/vars/connect.yml"
-
   pre_tasks:
     - name: Verify Ansible version requirements
       assert:

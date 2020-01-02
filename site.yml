@@ -12,6 +12,11 @@
       include_role:
         name: common
 
+    - name: Include aux/pyopenssl role
+      include_role:
+        name: aux/pyopenssl
+      when: inventory_hostname in groups['bacula_ca']
+
     - name: Include kvm role
       include_role:
         name: kvm

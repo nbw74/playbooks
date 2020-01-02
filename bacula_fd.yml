@@ -1,0 +1,11 @@
+---
+# vim: set ft=yaml.ansible:
+- name: Apply bacula-fd role
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Include bacula-fd role
+      include_role:
+        name: bacula/bacula-fd
+...
