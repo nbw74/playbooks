@@ -77,7 +77,9 @@
     - name: Include selinux/bacula/xtrabackup role
       include_role:
         name: selinux/bacula/xtrabackup
-      when: inventory_hostname in groups['mysql']
+      when:
+        - inventory_hostname in groups['mysql']
+        - selinux_state != 'disabled'
 
     - name: Include pg/postgresql role
       include_role:
