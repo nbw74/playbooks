@@ -39,9 +39,9 @@
         name: ct/systemd-nspawn
       when: inventory_hostname in groups['nspawn']
 
-    - name: Include web/selinux-for-web role
+    - name: Include selinux/web role
       include_role:
-        name: web/selinux-for-web
+        name: selinux/web
       when: inventory_hostname in groups['selinux_web']
 
     - name: Include web/ftpd role
@@ -72,6 +72,11 @@
     - name: Include mysql role
       include_role:
         name: mysql
+      when: inventory_hostname in groups['mysql']
+
+    - name: Include selinux/bacula/xtrabackup role
+      include_role:
+        name: selinux/bacula/xtrabackup
       when: inventory_hostname in groups['mysql']
 
     - name: Include pg/postgresql role
