@@ -17,6 +17,11 @@
         name: aux/pyopenssl
       when: inventory_hostname in groups['bacula_ca']
 
+    - name: Include bacula-fd role
+      include_role:
+        name: bacula/bacula-fd
+      when: inventory_hostname not in groups['nobacula']
+
     - name: Include kvm role
       include_role:
         name: kvm
