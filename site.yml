@@ -99,6 +99,11 @@
         name: pg/postgresql-logging-collector
       when: inventory_hostname in groups['pg_log_collector']
 
+    - name: Include web/nginx role
+      include_role:
+        name: web/nginx
+      when: inventory_hostname in groups['nginx']
+
     - name: Include web/nodejs role
       include_role:
         name: web/nodejs
@@ -110,13 +115,10 @@
       include_role:
         name: web/php
       when: >
+        inventory_hostname in groups['php_fpm'] or
+        inventory_hostname in groups['httpd'] or
         inventory_hostname in groups['build_runners'] or
         inventory_hostname in groups['unit']
-
-    - name: Include web/nginx role
-      include_role:
-        name: web/nginx
-      when: inventory_hostname in groups['nginx']
 
     - name: Include web/httpd role
       include_role:
