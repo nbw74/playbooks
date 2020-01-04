@@ -25,9 +25,7 @@
     - name: Include kvm role
       include_role:
         name: kvm
-      when: >
-        inventory_hostname in groups['kvm'] or
-        inventory_hostname in groups['kvm_aliens']
+      when: inventory_hostname in groups['kvm']
 
     - name: Include ct/docker role
       include_role:
