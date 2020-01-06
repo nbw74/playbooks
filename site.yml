@@ -22,9 +22,9 @@
         name: kvm
       when: inventory_hostname in groups['kvm']
 
-    - name: Include quagga role
+    - name: Include net/quagga role
       include_role:
-        name: quagga
+        name: net/quagga
       when: inventory_hostname in groups['quagga']
 
     - name: Include bacula-fd role
