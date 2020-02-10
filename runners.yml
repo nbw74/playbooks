@@ -2,7 +2,6 @@
 # vim: set ft=yaml.ansible:
 - name: Apply runners roles
   hosts: all
-  serial: 1
   become: yes
 
   vars:
