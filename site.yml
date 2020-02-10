@@ -170,8 +170,8 @@
         - inventory_hostname in groups['nginx'] or inventory_hostname in groups['bitrix']
         - vhost|d([])|length > 0
 
-    - name: Include icinga2 role
+    - name: Include mon/icinga2 role
       include_role:
-        name: icinga2
+        name: mon/icinga2
       when: inventory_hostname in groups['icinga2']
 ...
