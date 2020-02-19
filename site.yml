@@ -156,7 +156,9 @@
     - name: Include web/composer role
       include_role:
         name: web/composer
-      when: inventory_hostname in groups['runners']
+      when: >
+        inventory_hostname in groups['build_runners'] or
+        inventory_hostname in groups['deploy_runners']
 
     - name: Include web/bitrix-env role
       include_role:
