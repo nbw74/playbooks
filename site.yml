@@ -18,6 +18,11 @@
         name: aux/pyopenssl
       when: inventory_hostname in groups['bacula_ca']
 
+    - name: Include aux/gitupdate role
+      include_role:
+        name: aux/gitupdate
+      when: inventory_hostname in groups['gitlux']
+
     - name: Include kvm role
       include_role:
         name: kvm
