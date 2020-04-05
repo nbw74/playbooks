@@ -40,7 +40,7 @@
 
     - name: Include ct/docker role
       include_role:
-        name: ct/docker
+        name: docker
       when: inventory_hostname in groups['docker']
 
     - name: Include ct/systemd-nspawn role
