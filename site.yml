@@ -1,184 +1,280 @@
 ---
 # vim: set ft=yaml.ansible:
-- name: Apply all roles
+- name: Apply base roles
   hosts: all
   serial: 1
-  become: yes
-
-  vars:
-    ansible_user: anrunner
 
   tasks:
-    - name: Include base role
-      include_role:
+    - name: Import base role
+      import_role:
         name: common
 
-    - name: Include aux/pyopenssl role
-      include_role:
-        name: aux/pyopenssl
-      when: inventory_hostname in groups['bacula_ca']
-
-    - name: Include aux/gitupdate role
-      include_role:
-        name: aux/gitupdate
-      when: inventory_hostname in groups['gitlux']
-
-    - name: Include kvm role
-      include_role:
-        name: kvm
-      when: inventory_hostname in groups['kvm']
-
-    - name: Include net/quagga role
-      include_role:
-        name: net/quagga
-      when: inventory_hostname in groups['quagga']
-
-    - name: Include bacula-fd role
+    - name: Include bacula/bacula-fd role
       include_role:
         name: bacula/bacula-fd
-      when: inventory_hostname not in groups['nobacula']
+      when: not bacula_fd_skip|d()
 
-    - name: Include ct/docker role
-      include_role:
-        name: docker
-      when: inventory_hostname in groups['docker']
+- name: Apply aux/pyopenssl role
+  hosts: bacula_ca
+  serial: 1
 
-    - name: Include ct/systemd-nspawn role
-      include_role:
+  tasks:
+    - name: Import aux/pyopenssl role
+      import_role:
+        name: aux/pyopenssl
+
+- name: Apply aux/gitupdate role
+  hosts: gitlux
+  serial: 1
+
+  tasks:
+    - name: Import aux/gitupdate role
+      import_role:
+        name: aux/gitupdate
+
+- name: Apply kvm role
+  hosts: kvm
+  serial: 1
+
+  tasks:
+    - name: Import kvm role
+      import_role:
+        name: kvm
+
+- name: Apply net/quagga role
+  hosts: quagga
+  serial: 1
+
+  tasks:
+    - name: Import net/quagga role
+      import_role:
+        name: net/quagga
+
+- name: Apply ct/docker role
+  hosts: docker
+  serial: 1
+
+  tasks:
+    - name: Import ct/docker role
+      import_role:
+        name: ct/docker
+
+- name: Apply ct/systemd-nspawn role
+  hosts: nspawn
+  serial: 1
+
+  tasks:
+    - name: Import ct/systemd-nspawn role
+      import_role:
         name: ct/systemd-nspawn
-      when: inventory_hostname in groups['nspawn']
 
-    - name: Include selinux/web role
-      include_role:
+- name: Apply selinux/web role
+  hosts: selinux_web
+  serial: 1
+
+  tasks:
+    - name: Import selinux/web role
+      import_role:
         name: selinux/web
-      when: inventory_hostname in groups['selinux_web']
 
-    - name: Include web/ftpd role
-      include_role:
+- name: Apply web/ftpd role
+  hosts: ftpd
+  serial: 1
+
+  tasks:
+    - name: Import web/ftpd role
+      import_role:
         name: web/ftpd
-      when: inventory_hostname in groups['ftpd']
 
-    - name: Include gitlab-runner role
-      include_role:
-        name: gitlab-runner
-      when: inventory_hostname in groups['runners']
+- name: Apply ci/gitlab-runner role
+  hosts: runners
+  serial: 1
 
-    - name: Include memcached role
-      include_role:
+  tasks:
+    - name: Import ci/gitlab-runner role
+      import_role:
+        name: ci/gitlab-runner
+
+- name: Apply memcached role
+  hosts: memcached
+  serial: 1
+
+  tasks:
+    - name: Import memcached role
+      import_role:
         name: memcached
-      when: inventory_hostname in groups['memcached']
 
-    - name: Include pcmk role
-      include_role:
+- name: Apply pcmk role
+  hosts: pacemaker
+  serial: 1
+
+  tasks:
+    - name: Import pcmk role
+      import_role:
         name: pcmk
-      when: inventory_hostname in groups['pacemaker']
 
-    - name: Include redis role
-      include_role:
+- name: Apply redis role
+  hosts: redis
+  serial: 1
+
+  tasks:
+    - name: Import redis role
+      import_role:
         name: redis
-      when: inventory_hostname in groups['redis']
 
-    - name: Include mysql role
-      include_role:
+- name: Apply mysql roles
+  hosts: mysql
+  serial: 1
+
+  tasks:
+    - name: Import mysql role
+      import_role:
         name: mysql
-      when: inventory_hostname in groups['mysql']
 
     - name: Include selinux/bacula/xtrabackup role
       include_role:
         name: selinux/bacula/xtrabackup
-      when:
-        - inventory_hostname in groups['mysql']
-        - selinux_state != 'disabled'
+      when: selinux_state != 'disabled'
 
-    - name: Include pg/postgresql role
-      include_role:
+- name: Apply pg/postgresql role
+  hosts: postgresql
+  serial: 1
+
+  tasks:
+    - name: Import pg/postgresql role
+      import_role:
         name: pg/postgresql
-      when: inventory_hostname in groups['postgresql']
 
-    - name: Include pg/pgbouncer role
-      include_role:
+- name: Apply pg/pgbouncer role
+  hosts: pgbouncer
+  serial: 1
+
+  tasks:
+    - name: Import pg/pgbouncer role
+      import_role:
         name: pg/pgbouncer
-      when: inventory_hostname in groups['pgbouncer']
 
-    - name: Include pg/postgresql-wal-archive role
-      include_role:
+- name: Apply pg/postgresql-wal-archive role
+  hosts: pg_wal_archive
+  serial: 1
+
+  tasks:
+    - name: Import pg/postgresql-wal-archive role
+      import_role:
         name: pg/postgresql-wal-archive
-      when: inventory_hostname in groups['pg_wal_archive']
 
-    - name: Include pg/postgresql-logging-collector role
-      include_role:
+- name: Apply pg/postgresql-logging-collector role
+  hosts: pg_log_collector
+  serial: 1
+
+  tasks:
+    - name: Import pg/postgresql-logging-collector role
+      import_role:
         name: pg/postgresql-logging-collector
-      when: inventory_hostname in groups['pg_log_collector']
 
-    - name: Include web/nginx role
-      include_role:
+- name: Apply web/nginx role
+  hosts: nginx
+  serial: 1
+
+  tasks:
+    - name: Import web/nginx role
+      import_role:
         name: web/nginx
-      when: inventory_hostname in groups['nginx']
 
-    - name: Include web/nodejs role
-      include_role:
+- name: Apply web/nodejs role
+  hosts: nodejs,build_runners
+  serial: 1
+
+  tasks:
+    - name: Import web/nodejs role
+      import_role:
         name: web/nodejs
-      when: >
-        inventory_hostname in groups['nodejs'] or
-        inventory_hostname in groups['build_runners']
 
-    - name: Include web/php role
-      include_role:
+- name: Apply web/php role
+  hosts: php_fpm,httpd,build_runners,unit
+  serial: 1
+
+  tasks:
+    - name: Import web/php role
+      import_role:
         name: web/php
-      when: >
-        inventory_hostname in groups['php_fpm'] or
-        inventory_hostname in groups['httpd'] or
-        inventory_hostname in groups['build_runners'] or
-        inventory_hostname in groups['unit']
 
-    - name: Include web/httpd role
-      include_role:
+- name: Apply web/httpd role
+  hosts: httpd
+  serial: 1
+
+  tasks:
+    - name: Import web/httpd role
+      import_role:
         name: web/httpd
-      when: inventory_hostname in groups['httpd']
 
-    - name: Include web/php-fpm role
-      include_role:
+- name: Apply web/php-fpm role
+  hosts: php_fpm
+  serial: 1
+
+  tasks:
+    - name: Import web/php-fpm role
+      import_role:
         name: web/php-fpm
-      when: inventory_hostname in groups['php_fpm']
 
-    - name: Include web/unit role
-      include_role:
+- name: Apply unit roles
+  hosts: unit
+  serial: 1
+
+  tasks:
+    - name: Import web/unit role
+      import_role:
         name: web/unit
-      when: inventory_hostname in groups['unit']
 
     - name: Include laravel tasks
       include_role:
         name: web/php-fpm
         tasks_from: laravel.yml
-      when: inventory_hostname in groups['unit']
 
+- name: Apply unit-devel role
+  hosts: build_unit
+  serial: 1
+
+  tasks:
     - name: Include unit-devel
       include_role:
         name: web/unit
         tasks_from: packages.yml
-      when: inventory_hostname in groups['build_unit']
 
-    - name: Include web/composer role
-      include_role:
+- name: Apply web/composer role
+  hosts: build_runners,deploy_runners
+  serial: 1
+
+  tasks:
+    - name: Import web/composer role
+      import_role:
         name: web/composer
-      when: >
-        inventory_hostname in groups['build_runners'] or
-        inventory_hostname in groups['deploy_runners']
 
-    - name: Include web/bitrix-env role
-      include_role:
+- name: Apply web/bitrix-env role
+  hosts: bitrix
+  serial: 1
+
+  tasks:
+    - name: Import web/bitrix-env role
+      import_role:
         name: web/bitrix-env
-      when: inventory_hostname in groups['bitrix']
 
+- name: Apply web/vhost role
+  hosts: nginx,bitrix
+  serial: 1
+
+  tasks:
     - name: Include web/vhost role
       include_role:
         name: web/vhost
-      when:
-        - inventory_hostname in groups['nginx'] or inventory_hostname in groups['bitrix']
-        - vhost|d([])|length > 0
+      when: vhost|d([])|length > 0
 
-    - name: Include mon/icinga2 role
-      include_role:
+- name: Apply mon/icinga2 role
+  hosts: icinga2
+  serial: 1
+
+  tasks:
+    - name: Import mon/icinga2 role
+      import_role:
         name: mon/icinga2
-      when: inventory_hostname in groups['icinga2']
 ...
