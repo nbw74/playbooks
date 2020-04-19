@@ -9,10 +9,6 @@
       import_role:
         name: common
 
-    - name: Import system/useradd role
-      import_role:
-        name: system/useradd
-
     - name: Import system/localfiles role
       import_role:
         name: system/localfiles
@@ -21,15 +17,6 @@
       include_role:
         name: bacula/bacula-fd
       when: not bacula_fd_skip|d()
-
-- name: Apply system/localfiles role
-  hosts: localfiles
-  serial: 1
-
-  tasks:
-    - name: Import system/localfiles role
-      import_role:
-        name: system/localfiles
 
 - name: Apply aux/pyopenssl role
   hosts: bacula_ca
