@@ -104,14 +104,14 @@
       import_role:
         name: memcached
 
-- name: Apply pcmk role
+- name: Apply cluster/pcmk role
   hosts: pacemaker
   serial: 1
 
   tasks:
-    - name: Import pcmk role
+    - name: Import cluster/pcmk role
       import_role:
-        name: pcmk
+        name: cluster/pcmk
 
 - name: Apply redis role
   hosts: redis
