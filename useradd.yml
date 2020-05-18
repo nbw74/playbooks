@@ -1,0 +1,12 @@
+---
+# vim: set ft=yaml.ansible:
+- name: USERADD
+  hosts: all
+  become: yes
+  serial: 1
+
+  tasks:
+    - name: Import system/useradd role
+      import_role:
+        name: system/useradd
+...

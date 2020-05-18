@@ -9,6 +9,10 @@
       import_role:
         name: common
 
+    - name: Import system/localfiles role
+      import_role:
+        name: system/localfiles
+
     - name: Include bacula/bacula-fd role
       include_role:
         name: bacula/bacula-fd
@@ -277,4 +281,13 @@
     - name: Import mon/icinga2 role
       import_role:
         name: mon/icinga2
+
+- name: Apply system/useradd role
+  hosts: all
+  serial: 1
+
+  tasks:
+    - name: Import system/useradd role
+      import_role:
+        name: system/useradd
 ...
