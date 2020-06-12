@@ -5,6 +5,10 @@
   become: yes
 
   tasks:
+    - name: Import web/php-fpm role
+      import_role:
+        name: web/php-fpm
+
     - name: Import web/vhost role
       import_role:
         name: web/vhost
